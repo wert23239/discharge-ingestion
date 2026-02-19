@@ -4,11 +4,10 @@ import path from 'path';
 import fs from 'fs';
 import uploadRoutes from './routes/uploads';
 import dischargeRoutes from './routes/discharges';
-import { PrismaClient } from '@prisma/client';
+import prisma from './lib/prisma';
 import { parseDischargeText, parsePdfBuffer } from './services/pdfParser';
 
 const app = express();
-const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());

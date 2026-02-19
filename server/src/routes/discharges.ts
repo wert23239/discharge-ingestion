@@ -1,9 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma';
 import { validatePhone } from '../services/enrichment';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // Async handler wrapper to catch promise rejections
 const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) =>
@@ -48,6 +47,7 @@ router.get('/stats', asyncHandler(async (_req, res) => {
 // GET /api/discharges/:id
 router.get('/:id', asyncHandler(async (req, res) => {
   const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
   const discharge = await prisma.discharge.findUnique({
     where: { id },
     include: {
@@ -64,13 +64,33 @@ router.get('/:id', asyncHandler(async (req, res) => {
   res.json(discharge);
 }));
 
+// Whitelist of editable fields to prevent mass-assignment
+const EDITABLE_FIELDS = new Set([
+  'patientName', 'epicId', 'phoneNumber', 'attendingPhysician',
+  'dischargeDate', 'primaryCareProvider', 'insurance', 'disposition',
+]);
+
 // PATCH /api/discharges/:id - Edit with lineage
 router.patch('/:id', asyncHandler(async (req, res) => {
   const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+
   const { fields, editedBy, reason } = req.body;
 
-  if (!fields || !editedBy) {
-    return res.status(400).json({ error: 'fields and editedBy are required' });
+  if (!fields || typeof fields !== 'object' || !editedBy) {
+    return res.status(400).json({ error: 'fields (object) and editedBy (string) are required' });
+  }
+
+  // Filter to only allowed fields
+  const safeFields: Record<string, string> = {};
+  for (const [key, value] of Object.entries(fields)) {
+    if (EDITABLE_FIELDS.has(key)) {
+      safeFields[key] = value as string;
+    }
+  }
+
+  if (Object.keys(safeFields).length === 0) {
+    return res.status(400).json({ error: 'No valid editable fields provided' });
   }
 
   const discharge = await prisma.discharge.findUnique({ where: { id } });
@@ -79,7 +99,7 @@ router.patch('/:id', asyncHandler(async (req, res) => {
   }
 
   // Create edit records for each changed field
-  const editPromises = Object.entries(fields).map(([fieldName, newValue]) => {
+  const editPromises = Object.entries(safeFields).map(([fieldName, newValue]) => {
     const oldValue = (discharge as any)[fieldName];
     if (oldValue === newValue) return null;
 
@@ -100,7 +120,7 @@ router.patch('/:id', asyncHandler(async (req, res) => {
   // Update the discharge record
   const updated = await prisma.discharge.update({
     where: { id },
-    data: fields,
+    data: safeFields,
     include: { edits: { orderBy: { editedAt: 'desc' } }, enrichments: true },
   });
 
@@ -110,6 +130,7 @@ router.patch('/:id', asyncHandler(async (req, res) => {
 // POST /api/discharges/:id/review
 router.post('/:id/review', asyncHandler(async (req, res) => {
   const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
   const { status, reviewedBy } = req.body;
 
   if (!['APPROVED', 'REJECTED'].includes(status)) {
@@ -132,6 +153,7 @@ router.post('/:id/review', asyncHandler(async (req, res) => {
 // POST /api/discharges/:id/enrich
 router.post('/:id/enrich', asyncHandler(async (req, res) => {
   const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
   const discharge = await prisma.discharge.findUnique({ where: { id } });
 
   if (!discharge) {

@@ -24,9 +24,11 @@ Rural hospitals often export daily discharge lists as PDFs from their EHR system
 
 ## 🚀 Live Demo
 
+**Live:** [https://kouper-health.onrender.com](https://kouper-health.onrender.com)
+
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/wert23239/kouper-health-challenge)
 
-Click the button above to deploy instantly on Render (free tier). Or run locally:
+Or run locally:
 
 ## 🚀 Quick Start
 
@@ -142,13 +144,15 @@ The architecture is designed for extension:
 cd server && npm test
 ```
 
-Tests cover:
+29 tests across 3 test suites cover:
 - Hospital name and date extraction
 - All 4 sample records parsed correctly
 - Phone normalization (dashes, raw digits, missing)
 - Provider credential reordering
 - Confidence scoring
-- Edge cases (empty input, header-only)
+- Edge cases (empty input, header-only, whitespace, no Epic IDs, unknown dispositions)
+- Phone validation (mock Twilio) — valid, invalid, landline, short numbers
+- Insurance verification — known plans, unknown plans, Self Pay
 
 ## 🎨 UI Features
 
