@@ -2,14 +2,13 @@
   "name": "kouper-health-challenge",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "cd server && npm run dev",
-    "dev:client": "cd client && npm run dev",
+    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\"",
     "install:all": "cd server && npm install && cd ../client && npm install",
     "build": "cd client && npm run build",
+    "seed": "cd server && npx ts-node src/seed.ts",
     "test": "cd server && npm test"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.0"
   }
 }
