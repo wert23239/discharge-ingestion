@@ -1,22 +1,23 @@
-FROM node:22-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Install root deps
-COPY package*.json ./
-RUN npm ci --production=false
-
-# Build client
+# Client build
+COPY client/package*.json ./client/
+RUN cd client && npm install
 COPY client ./client
-RUN cd client && npm ci && npm run build
+RUN cd client && npm run build
 
-# Build server
+# Server build
+COPY server/package*.json ./server/
+RUN cd server && npm install
 COPY server ./server
+RUN cd server && npx prisma generate
+
+# Copy sample data + client dist for serving
 COPY sample-data ./sample-data
-RUN cd server && npm ci && npx prisma generate && npx prisma db push
 
-# Server serves client/dist as static files
-EXPOSE 3001
-ENV PORT=3001 NODE_ENV=production
+EXPOSE 10000
+ENV PORT=10000 NODE_ENV=production
 
-CMD ["npx", "--prefix", "server", "tsx", "src/index.ts"]
+CMD cd server && npx prisma db push && npx tsx src/index.ts
