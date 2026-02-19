@@ -1,10 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import uploadRoutes from './routes/uploads';
 import dischargeRoutes from './routes/discharges';
 import { PrismaClient } from '@prisma/client';
-import { parseDischargeText } from './services/pdfParser';
+import { parseDischargeText, parsePdfBuffer } from './services/pdfParser';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -22,19 +23,32 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Global error handler
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
 // Auto-seed on first run
 async function autoSeed() {
   const count = await prisma.upload.count();
   if (count === 0) {
     console.log('No data found. Auto-seeding...');
-    const SAMPLE_TEXT = `Sacred Heart Hospital Discharges for July 4th, 2023
-Name | Epic Id | Phone number | Attending Physician | Date | Primary Care Provider | Insurance | Disposition
-Sunshine, Melody | EP001234567 | 202-555-0152 | Kildare, James MD | 07-04-2023 | Bailey, Miranda MD | BCBS | Home
-O'Furniture, Patty | EP001239901 | 202-555-0148 | Hardy, Steve MD | 07-04-2023 | Webber, Richard MD | Aetna Health | HHS
-Bacon, Chris P. | EP001237654 | 4047271234 | Manning, Steward Wallace PA | 07-04-2023 | Sloan, MD Mark | Self Pay | SNF
-Mellow, S. Marsha Bayabygirl | EP001239876 | (missing) | House, Greg MD | 07-04-2023 | (missing) | Humana Health | Home`;
-
-    const result = parseDischargeText(SAMPLE_TEXT);
+    // Try to parse the actual PDF first, fall back to inline text
+    const samplePdfPath = path.join(__dirname, '../../sample-data/Sacred.Heart.Hospital.Discharges.pdf');
+    let result;
+    if (fs.existsSync(samplePdfPath)) {
+      const pdfBuffer = fs.readFileSync(samplePdfPath);
+      result = await parsePdfBuffer(pdfBuffer);
+    } else {
+      // Fallback: inline sample data
+      const SAMPLE_TEXT = `Sacred Heart Hospital Discharges for July 4th, 2023
+Sunshine, MelodyEP001234567202-555-0152Kildare, James MD07-04-2023Bailey, Miranda MDBCBSHome
+O'Furniture, Patty EP001239901202-555-0148Hardy, Steve MD07-04-2023Webber, Richard MDAetna HealthHHS
+Bacon, Chris P.EP0012376544047271234Manning, Steward Wallace PA07-04-2023Sloan, MD Mark Self PaySNF
+Mellow, S. Marsha BayabygirlEP001239876House, Greg MD07-04-2023Humana HealthHome`;
+      result = parseDischargeText(SAMPLE_TEXT);
+    }
     const upload = await prisma.upload.create({
       data: {
         filename: 'Sacred.Heart.Hospital.Discharges.pdf',

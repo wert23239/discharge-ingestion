@@ -1,12 +1,16 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { validatePhone } from '../services/enrichment';
 
 const router = Router();
 const prisma = new PrismaClient();
 
+// Async handler wrapper to catch promise rejections
+const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) =>
+  (req: Request, res: Response, next: NextFunction) => fn(req, res, next).catch(next);
+
 // GET /api/discharges - List with filters
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', asyncHandler(async (req, res) => {
   const { status, uploadId, search } = req.query;
 
   const where: any = {};
@@ -26,10 +30,10 @@ router.get('/', async (req: Request, res: Response) => {
   });
 
   res.json(discharges);
-});
+}));
 
-// GET /api/discharges/stats
-router.get('/stats', async (_req: Request, res: Response) => {
+// GET /api/discharges/stats — MUST come before /:id
+router.get('/stats', asyncHandler(async (_req, res) => {
   const [total, pending, approved, rejected, uploads] = await Promise.all([
     prisma.discharge.count(),
     prisma.discharge.count({ where: { status: 'PENDING_REVIEW' } }),
@@ -39,10 +43,10 @@ router.get('/stats', async (_req: Request, res: Response) => {
   ]);
 
   res.json({ total, pending, approved, rejected, uploads });
-});
+}));
 
 // GET /api/discharges/:id
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', asyncHandler(async (req, res) => {
   const id = parseInt(req.params.id);
   const discharge = await prisma.discharge.findUnique({
     where: { id },
@@ -58,10 +62,10 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 
   res.json(discharge);
-});
+}));
 
 // PATCH /api/discharges/:id - Edit with lineage
-router.patch('/:id', async (req: Request, res: Response) => {
+router.patch('/:id', asyncHandler(async (req, res) => {
   const id = parseInt(req.params.id);
   const { fields, editedBy, reason } = req.body;
 
@@ -83,10 +87,10 @@ router.patch('/:id', async (req: Request, res: Response) => {
       data: {
         dischargeId: id,
         fieldName,
-        oldValue: oldValue?.toString() || null,
-        newValue: (newValue as string) || null,
+        oldValue: oldValue?.toString() ?? '',
+        newValue: (newValue as string) ?? '',
         editedBy,
-        reason: reason || null,
+        reason: reason || '',
       },
     });
   });
@@ -101,10 +105,10 @@ router.patch('/:id', async (req: Request, res: Response) => {
   });
 
   res.json(updated);
-});
+}));
 
-// POST /api/discharges/:id/review - Approve or reject
-router.post('/:id/review', async (req: Request, res: Response) => {
+// POST /api/discharges/:id/review
+router.post('/:id/review', asyncHandler(async (req, res) => {
   const id = parseInt(req.params.id);
   const { status, reviewedBy } = req.body;
 
@@ -123,10 +127,10 @@ router.post('/:id/review', async (req: Request, res: Response) => {
   });
 
   res.json(discharge);
-});
+}));
 
-// POST /api/discharges/:id/enrich - Trigger enrichment
-router.post('/:id/enrich', async (req: Request, res: Response) => {
+// POST /api/discharges/:id/enrich
+router.post('/:id/enrich', asyncHandler(async (req, res) => {
   const id = parseInt(req.params.id);
   const discharge = await prisma.discharge.findUnique({ where: { id } });
 
@@ -151,6 +155,6 @@ router.post('/:id/enrich', async (req: Request, res: Response) => {
   }
 
   res.json(results);
-});
+}));
 
 export default router;
