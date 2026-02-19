@@ -1,8 +1,12 @@
 services:
   - type: web
     name: kouper-health
-    runtime: docker
+    runtime: node
     plan: free
+    buildCommand: cd client && npm install && npm run build && cd ../server && npm install && npx prisma generate
+    startCommand: cd server && npx prisma db push && npx tsx src/index.ts
     envVars:
       - key: PORT
         value: 10000
+      - key: NODE_ENV
+        value: production
