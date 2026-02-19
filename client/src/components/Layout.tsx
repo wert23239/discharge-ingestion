@@ -23,7 +23,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <span className="text-white text-lg font-bold">K</span>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-800">Kouper Health</h1>
+              <h1 className="text-lg font-bold text-slate-800">Discharge Manager</h1>
               <p className="text-xs text-slate-500">Discharge Manager</p>
             </div>
           </Link>

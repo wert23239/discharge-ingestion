@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-Sacred Heart Hospital exports daily discharge lists as PDFs from their EHR. These PDFs contain patient discharge records in a semi-structured tabular format. We need to ingest this data into the Kouper platform to trigger transitional care management (TCM) outreach campaigns within the CMS-required 2-business-day window.
+Sacred Heart Hospital exports daily discharge lists as PDFs from their EHR. These PDFs contain patient discharge records in a semi-structured tabular format. We need to ingest this data into the platform to trigger transitional care management (TCM) outreach campaigns within the CMS-required 2-business-day window.
 
 ## Q1: From Unstructured PDF to Structured Output
 

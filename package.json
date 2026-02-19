@@ -1,5 +1,5 @@
 {
-  "name": "kouper-health-challenge",
+  "name": "discharge-manager",
   "private": true,
   "scripts": {
     "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\"",

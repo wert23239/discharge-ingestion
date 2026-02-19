@@ -1,5 +1,5 @@
 {
-  "name": "kouper-health-server",
+  "name": "discharge-manager-server",
   "version": "1.0.0",
   "private": true,
   "scripts": {

@@ -1,4 +1,4 @@
-# Kouper Health Challenge — Build Plan
+# Discharge Manager — Build Plan
 
 ## Understanding the Problem
 

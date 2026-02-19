@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: kouper-health
+    name: discharge-manager
     runtime: node
     plan: free
     buildCommand: cd client && npm install && npm run build && cd ../server && npm install && npx prisma generate

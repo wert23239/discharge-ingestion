@@ -1,6 +1,6 @@
-# Kouper Health — Discharge Ingestion Platform
+# Discharge Manager — Discharge Ingestion Platform
 
-A full-stack application for ingesting, reviewing, and managing hospital discharge records from PDF files. Built for the Kouper Health Full-Stack Challenge.
+A full-stack application for ingesting, reviewing, and managing hospital discharge records from PDF files. Built as a full-stack discharge management platform.
 
 ## 🏥 Overview
 
@@ -24,9 +24,9 @@ Rural hospitals often export daily discharge lists as PDFs from their EHR system
 
 ## 🚀 Live Demo
 
-**Live:** [https://kouper-health.onrender.com](https://kouper-health.onrender.com)
+**Live:** [https://discharge-manager.onrender.com](https://discharge-manager.onrender.com)
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/wert23239/kouper-health-challenge)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/wert23239/discharge-manager)
 
 Or run locally:
 

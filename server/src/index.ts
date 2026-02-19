@@ -107,7 +107,7 @@ Mellow, S. Marsha BayabygirlEP001239876House, Greg MD07-04-2023Humana HealthHome
 }
 
 app.listen(PORT, async () => {
-  console.log(`🏥 Kouper Health Server running on http://localhost:${PORT}`);
+  console.log(`🏥 Discharge Manager Server running on http://localhost:${PORT}`);
   await autoSeed();
 });
 
