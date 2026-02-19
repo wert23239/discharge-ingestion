@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: kouper-health
+    runtime: node
+    buildCommand: cd client && npm install && npm run build && cd ../server && npm install && npx prisma generate && npx prisma db push
+    startCommand: cd server && npx ts-node src/index.ts
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
