@@ -3,10 +3,7 @@ services:
     name: kouper-health
     runtime: node
     plan: free
-    buildCommand: |
-      npm ci &&
-      cd client && npm ci && npm run build && cd .. &&
-      cd server && npm ci && npx prisma generate && npx prisma db push
+    buildCommand: npm ci && cd client && npm ci && npm run build && cd .. && cd server && npm ci && npx prisma generate && npx prisma db push
     startCommand: cd server && npx tsx src/index.ts
     envVars:
       - key: PORT
