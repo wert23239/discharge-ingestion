@@ -22,6 +22,12 @@ Rural hospitals often export daily discharge lists as PDFs from their EHR system
 | PDF Parsing | pdf-parse + custom heuristic parser |
 | Testing | Vitest |
 
+## 🚀 Live Demo
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/wert23239/kouper-health-challenge)
+
+Click the button above to deploy instantly on Render (free tier). Or run locally:
+
 ## 🚀 Quick Start
 
 ```bash
