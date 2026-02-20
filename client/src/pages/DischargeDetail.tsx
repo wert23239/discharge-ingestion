@@ -166,12 +166,17 @@ export default function DischargeDetail() {
                 placeholder="Your name"
                 className="input mb-4"
               />
-              <div className="flex gap-3">
-                <button onClick={() => handleReview('APPROVED')} className="btn-primary flex-1">
-                  ✓ Approve
-                </button>
-                <button onClick={() => handleReview('REJECTED')} className="btn-danger flex-1">
-                  ✗ Reject
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-3">
+                  <button onClick={() => handleReview('APPROVED')} className="btn-primary flex-1">
+                    ✓ Approve
+                  </button>
+                  <button onClick={() => handleReview('REJECTED')} className="btn-danger flex-1">
+                    ✗ Reject
+                  </button>
+                </div>
+                <button onClick={() => handleReview('NEEDS_EDIT' as any)} className="btn-secondary w-full text-sm">
+                  ✏️ Needs Edit
                 </button>
               </div>
             </div>

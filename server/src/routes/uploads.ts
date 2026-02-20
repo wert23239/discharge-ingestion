@@ -95,6 +95,7 @@ router.get('/', asyncHandler(async (_req: Request, res: Response) => {
 // GET /api/uploads/:id
 router.get('/:id', asyncHandler(async (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: 'Invalid upload ID' });
   const uploadRecord = await prisma.upload.findUnique({
     where: { id },
     include: { discharges: { include: { edits: true, enrichments: true } } },
