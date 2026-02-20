@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
+import { useDebounce } from '../hooks/useDebounce';
 import type { Discharge } from '../types';
 import StatusBadge from '../components/StatusBadge';
 import ConfidenceBadge from '../components/ConfidenceBadge';
@@ -18,15 +19,16 @@ export default function ReviewQueue() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('ALL');
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
   const [sortField, setSortField] = useState<'patientName' | 'confidence' | 'dischargeDate'>('patientName');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     setLoading(true);
-    api.getDischarges({ status: tab === 'ALL' ? undefined : tab, search: search || undefined })
+    api.getDischarges({ status: tab === 'ALL' ? undefined : tab, search: debouncedSearch || undefined })
       .then(setDischarges)
       .finally(() => setLoading(false));
-  }, [tab, search]);
+  }, [tab, debouncedSearch]);
 
   const sorted = [...discharges].sort((a, b) => {
     const av = a[sortField] ?? '';

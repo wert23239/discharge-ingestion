@@ -6,11 +6,30 @@ import { parsePdfBuffer } from '../services/pdfParser';
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
+// Simple in-memory rate limiter for uploads (max 10 per minute per IP)
+const uploadRateMap = new Map<string, number[]>();
+const RATE_WINDOW_MS = 60_000;
+const RATE_MAX = 10;
+
+function checkUploadRate(req: Request, res: Response): boolean {
+  const ip = req.ip || 'unknown';
+  const now = Date.now();
+  const timestamps = (uploadRateMap.get(ip) || []).filter(t => now - t < RATE_WINDOW_MS);
+  if (timestamps.length >= RATE_MAX) {
+    res.status(429).json({ error: 'Too many uploads. Please wait a moment.' });
+    return false;
+  }
+  timestamps.push(now);
+  uploadRateMap.set(ip, timestamps);
+  return true;
+}
+
 const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) =>
   (req: Request, res: Response, next: NextFunction) => fn(req, res, next).catch(next);
 
 // POST /api/uploads - Upload and parse a PDF
 router.post('/', upload.single('file'), async (req: Request, res: Response) => {
+  if (!checkUploadRate(req, res)) return;
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });

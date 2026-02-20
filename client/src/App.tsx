@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import ErrorBoundary from './components/ErrorBoundary';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Upload from './pages/Upload';
@@ -10,6 +11,7 @@ import NotFound from './pages/NotFound';
 
 export default function App() {
   return (
+    <ErrorBoundary>
     <BrowserRouter>
       <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
       <Layout>
@@ -23,5 +25,6 @@ export default function App() {
         </Routes>
       </Layout>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }
